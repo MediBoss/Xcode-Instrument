@@ -30,7 +30,7 @@
 
 import UIKit
 
-let apiKey = "74902fad0555561a15d00d767adbcb38"
+let apiKey = "1947eedcd881a72fe3a59d405a7efea4" 
 
 struct FlickrSearchResults {
   let searchTerm : String

@@ -62,24 +62,38 @@ extension SearchResultsViewController: UICollectionViewDataSource {
         self.collectionView.reloadItems(at: [ indexPath ])
       }
       
-      ImageCache.shared.loadThumbnail(for: flickrPhoto) { result in
-        
-        switch result {
-          
-        case .success(let image):
-          
-          if cell.flickrPhoto == flickrPhoto {
-            if flickrPhoto.isFavourite {
-              cell.imageView.image = image
-            } else if let filteredImage = image.applyTonalFilter() {
-              cell.imageView.image = filteredImage
+        ImageCache.shared.loadThumbnail(for: flickrPhoto) { result in
+            
+            switch result {
+                
+            case .success(let image):
+                
+                if cell.flickrPhoto == flickrPhoto {
+                    if flickrPhoto.isFavourite {
+                        cell.imageView.image = image
+                    } else {
+                        if let cachedImage = ImageCache.shared.image(forKey: "\(flickrPhoto.id)-filtered") {
+                            cell.imageView.image = cachedImage
+                        }
+                        else {
+                            DispatchQueue.global().async {
+                                if let filteredImage = image.applyTonalFilter() {
+                                    ImageCache.shared.set(filteredImage, forKey: "\(flickrPhoto.id)-filtered")
+                                    
+                                    DispatchQueue.main.async {
+                                        cell.imageView.image = filteredImage
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+            case .failure(let error):
+                print("Error: \(error)")
             }
-          }
-          
-        case .failure(let error):
-          print("Error: \(error)")
         }
-      }
+
     }
     return cell
   }
